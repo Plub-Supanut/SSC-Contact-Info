@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผู้ประสานงาน Elective ทุกสถาบัน</title>
+<style>
+:root {
+  --bg: #FAFAF7;
+  --card: #FFFFFF;
+  --border: #E8E5DE;
+  --text: #2C2A25;
+  --text2: #6B6760;
+  --accent: #2D6A4F;
+  --accent-light: #D8F3DC;
+  --tag-housing: #FFF3CD;
+  --tag-housing-text: #856404;
+  --tag-no-housing: #F8D7DA;
+  --tag-no-housing-text: #842029;
+  --tag-dept: #E8E5DE;
+  --tag-dept-text: #4A4740;
+  --highlight: #FFF9C4;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding-bottom: 64px;
+}
+
+.header {
+  background: var(--accent);
+  color: white;
+  padding: 32px 24px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.header p {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  outline: none;
+}
+
+.search-box::placeholder { color: #999; }
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.7);
+}
+
+.stats {
+  padding: 12px 24px;
+  font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stats strong { color: var(--text); }
+
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+.institution {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s;
+}
+
+.institution:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.inst-header {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  user-select: none;
+}
+
+.inst-code {
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.inst-info { flex: 1; min-width: 0; }
+
+.inst-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.inst-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.housing-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.housing-yes { background: var(--accent-light); color: var(--accent); }
+.housing-no { background: var(--tag-no-housing); color: var(--tag-no-housing-text); }
+.housing-paid { background: var(--tag-housing); color: var(--tag-housing-text); }
+
+.chevron {
+  font-size: 18px;
+  color: var(--text2);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.institution.open .chevron { transform: rotate(180deg); }
+
+.inst-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+
+.institution.open .inst-body { display: block; }
+
+.contact-section {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0ede6;
+}
+
+.contact-section:last-child { border-bottom: none; }
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 6px 0;
+  font-size: 14px;
+  align-items: baseline;
+}
+
+.contact-row + .contact-row { border-top: 1px solid #f7f5f0; }
+
+.contact-name {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 120px;
+}
+
+.contact-phone {
+  color: var(--accent);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.contact-email {
+  color: var(--text2);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.contact-note {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text2);
+  background: #f9f8f5;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.dept-tag {
+  display: inline-block;
+  background: var(--tag-dept);
+  color: var(--tag-dept-text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.housing-info {
+  background: #f9f8f5;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.housing-info strong { color: var(--text); }
+
+.no-results {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text2);
+  font-size: 15px;
+}
+
+.highlight-match { background: var(--highlight); border-radius: 2px; }
+
+.expand-all {
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .header { padding: 20px 16px 20px; }
+  .header h1 { font-size: 17px; }
+  .container { padding: 12px; }
+  .inst-header { padding: 14px 16px; }
+  .contact-section { padding: 10px 16px; }
+  .contact-name { min-width: 100%; }
+}
+
+@media print {
+  .header { position: static; background: white; color: black; }
+  .header h1 { color: black; }
+  .search-row, .filter-btn, .stats, .chevron { display: none !important; }
+  .institution { break-inside: avoid; page-break-inside: avoid; border: 1px solid #ccc; }
+  .inst-body { display: block !important; }
+  .institution.open .inst-body { display: block; }
+  body { padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ผู้ประสานงาน Elective — ทุกสถาบัน</h1>
+  <p>เบอร์โทรศัพท์และอีเมล หน่วยงานที่รับนิสิตปฏิบัติงานวิชาเลือก</p>
+  <div class="search-row">
+    <input class="search-box" id="search" type="text" placeholder="ค้นหา ชื่อสถาบัน ภาควิชา ชื่อผู้ประสาน เบอร์โทร อีเมล...">
+    <button class="filter-btn" data-filter="all">ทั้งหมด</button>
+    <button class="filter-btn" data-filter="housing">มีที่พัก</button>
+    <button class="filter-btn" data-filter="no-housing">ไม่มีที่พัก</button>
+    <button class="filter-btn" data-filter="university">มหาวิทยาลัย</button>
+    <button class="filter-btn" data-filter="hospital">โรงพยาบาล</button>
+  </div>
+</div>
+
+<div class="stats" id="stats">
+  <span>กำลังโหลด...</span>
+</div>
+
+<div class="container" id="list"></div>
+
+<script>
+const DATA = [
+  {
+    code: "",
+    name: "โรงพยาบาลพระปกเกล้า",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "พักห้องละ 2 คน ที่หอพักนิสิตแพทย์ 1 — ค่าไฟ 150 บ./สัปดาห์, ค่าน้ำฟรี, ค่าประกันกุญแจ 300 บ., ค่าประกันคีย์การ์ด 300 บ. เข้าพักได้ 1 วันก่อนขึ้นปฏิบัติงาน เตียง 3 ฟุตครึ่ง ต้องเตรียมหมอนและผ้าปูที่นอนมาเอง",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณต้อม", phone: "039324861", email: "cmec.ppk@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลชลบุรี",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ปี 6", name: "คุณแอน", phone: "038931670", email: "mec_chon@hotmail.com" },
+      { dept: "ปี 5", name: "คุณเอ๋", phone: "038931670", email: "mec_chon@hotmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "คณะแพทยศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "กายวิภาคศาสตร์", name: "", phone: "02-2564281, 02-2564751", email: "anatomy_tan@hotmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "คุณกบ / คุณแหม่ม", phone: "022564971, 022564951", email: "jeerawan_suk@yahoo.co.th" },
+      { dept: "จักษุวิทยา", name: "วรินทร เยื้อนหนูวงศ์", phone: "022564000 ต่อ 61634", email: "warinthon.y@gmail.com" },
+      { dept: "จุลชีววิทยา", name: "Pattaraporn S. (Fah)", phone: "02-256-4470/4471/4472/4474 ต่อ 109", email: "mspatta.s@gmail.com" },
+      { dept: "ชีวเคมี", name: "น.ส.พนินธรณ์ ประทุมเพ็ชร", phone: "02-256-4482", email: "panintorn.pt@gmail.com" },
+      { dept: "นิติเวชศาสตร์", name: "ธัญญารัตน์ สอนวิทย์", phone: "02-256-4000 ต่อ 72604", email: "forensic.medcu@gmail.com" },
+      { dept: "จิตเวชศาสตร์", name: "คุณนิสายชล ดวนใหญ่", phone: "022564298, 022564346", email: "nisaichon_d@hotmail.com" },
+      { dept: "พยาธิวิทยา", name: "อริยาภรณ์ ประคองวงษ์", phone: "02-256-4235 ต่อ 306", email: "nan.patho@gmail.com" },
+      { dept: "เภสัชวิทยา", name: "", phone: "02-256-4481", email: "" },
+      { dept: "รังสีวิทยา", name: "คุณนู", phone: "022564000 ต่อ 60849", email: "darika.t@chula.ac.th" },
+      { dept: "วิสัญญีวิทยา", name: "Anchalee Kaweekijboriboon", phone: "022564000 ต่อ 81517, 81515", email: "ankaweekij@gmail.com" },
+      { dept: "เวชศาสตร์ชันสูตร", name: "สิรภัทร สุริยะ / คุณากร เอกชยางกูร", phone: "02-256-4000 ต่อ 60573", email: "sirapatsuriya@gmail.com" },
+      { dept: "เวชศาสตร์ป้องกันและสังคม", name: "ปริญญา กิติดำรงสุข / ภาวิตา ดอนแก", phone: "02-256-4000 ต่อ 3701", email: "parinya.ki@chula.ac.th" },
+      { dept: "ศัลยศาสตร์", name: "คุณสุพรรณี สีแดง", phone: "022564000 ต่อ 61435", email: "seedang12@yahoo.com" },
+      { dept: "ออร์โธปิดิกส์", name: "", phone: "022564230, 022564510", email: "" },
+      { dept: "สรีรวิทยา", name: "", phone: "022564267", email: "sureepan.k@gmail.com" },
+      { dept: "สูติศาสตร์-นรีเวชวิทยา", name: "คุณวรัญญา", phone: "02-256-4000 ต่อ 2113", email: "undergrad@outlook.co.th" },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "เกศแก้ว เกตุมณี", phone: "022564000 ต่อ 61724", email: "katkaew.ent@gmail.com" },
+      { dept: "อายุรศาสตร์", name: "คุณวรรณี สีขาว / ดวงนภา เล็กลาด", phone: "022564000 ต่อ 61827, 61823", email: "" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "คุณจิณณ์ณิชา / พรพิมล ชูบุญ", phone: "02-256-4000 ต่อ 60603", email: "pim.love.prea@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "", phone: "", email: "emergency1873@gmail.com" },
+      { dept: "ศูนย์ชีวภิบาล (Palliative Care)", name: "", phone: "022564000 ต่อ 81420", email: "cheewabhibaln@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลภูมิพลอดุลยเดช กรมแพทย์ทหารอากาศ",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่ามัดจำกุญแจ 300 บ./คน, ค่ามัดจำคีย์การ์ด 300 บ./คน, ค่าธรรมเนียมเข้าพัก 200 บ./สัปดาห์/คน — แจ้งฝ่ายวิชาการ (พี่แจ๊ค) หากต้องการที่พัก",
+    contacts: [
+      { dept: "กองแพทยศาสตร์ศึกษา", name: "", phone: "025347411, 025347684", email: "patcharada09@gmail.com" },
+      { dept: "จักษุวิทยา", name: "", phone: "025347349", email: "" }
+    ]
+  },
+  {
+    code: "101",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยขอนแก่น",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณเฟียต", phone: "043-348888 ต่อ 67663", email: "thanhom@kku.ac.th" },
+      { dept: "อายุรศาสตร์", name: "คุณปุ้ย", phone: "043363665", email: "tanyph@kku.ac.th" },
+      { dept: "ศัลยศาสตร์", name: "คุณจตุพร น้อยสุวรรณ", phone: "043363252", email: "indirectnew@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณศรินญา เนาวัฒน์", phone: "043348398, 088-5519528", email: "ortho.kku@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "", phone: "043366869", email: "chotmo@kku.ac.th" },
+      { dept: "เวชศาสตร์ครอบครัว", name: "", phone: "043364123", email: "" },
+      { dept: "วิสัญญีวิทยา", name: "คุณจุรีรัตน์ พิทอง", phone: "0897105503, 043348390 ต่อ 302", email: "jureph@kku.ac.th" },
+      { dept: "นิติเวชศาสตร์", name: "", phone: "043202859", email: "" },
+      { dept: "จักษุวิทยา", name: "คุณจินตนา (จิ๋ว)", phone: "043348383, 0895733130", email: "jintsi@kku.ac.th", note: "ไม่สะดวกรับนิสิต เดือน พ.ค. - ก.ค." },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "คุณน้ำทิพย์ แสงประเสริฐ", phone: "043363563, 0648682376", email: "namtpa@kku.ac.th" },
+      { dept: "จิตเวชศาสตร์", name: "", phone: "043363027, 0868504489", email: "sinsja@kku.ac.th" },
+      { dept: "รังสีวิทยา", name: "Sukanya Boonphongsathain", phone: "043363614, 087-5041130", email: "sukabo@kku.ac.th" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "", phone: "", email: "darubo@kku.ac.th" },
+      { dept: "สูติศาสตร์และนรีเวชวิทยา", name: "", phone: "043363030", email: "jamjkr@kku.ac.th" }
+    ]
+  },
+  {
+    code: "102",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยเชียงใหม่",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณจีระนันท์ (หนิง)", phone: "053-935262-3", email: "jeeranun.j@cmu.ac.th" },
+      { dept: "อายุรศาสตร์", name: "คุณเกสร หมื่นแปง", phone: "053935483", email: "cmumedicine@gmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "คุณรัตน์ติกา แซ่ตั้ง", phone: "053936462", email: "ratti050@gmail.com" },
+      { dept: "ศัลยศาสตร์", name: "คุณพรทิพา", phone: "053935533 ต่อ 104", email: "" },
+      { dept: "สูติศาสตร์และนรีเวชวิทยา", name: "คุณสุรพร ประจงแสงศรี (แอ้)", phone: "0817467187, 053935554", email: "suraporn.p@cmu.ac.th" },
+      { dept: "ออร์โทปิดิกส์", name: "คุณศิริเพ็ญ ขอบุญ", phone: "053935545", email: "siripenkhorboon@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "", phone: "053938796, 053936723", email: "emergencycmu@cmu.ac.th" },
+      { dept: "เวชศาสตร์ครอบครัว", name: "คุณนฤมล ไชยวงศ์", phone: "053-935462", email: "n.arumon.c198@gmail.com" },
+      { dept: "วิสัญญีวิทยา", name: "คุณกรรณิการ์ เอกวัฒน์", phone: "053935526", email: "kanneekar@gmail.com" },
+      { dept: "นิติเวชศาสตร์", name: "นายธีราวัฒน์ ประดับผล", phone: "053935432", email: "" },
+      { dept: "จักษุวิทยา", name: "น.ส.นภัทรทิตา บุญยัง", phone: "053935512, 053936121", email: "napattita20@gmail.com" },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "คุณบัณฑิต เขียมสกุล", phone: "053935569", email: "bandit.j1111@gmail.com" },
+      { dept: "จิตเวชศาสตร์", name: "คุณวีรพงศ์ นวลศรี", phone: "0846154614, 053935422", email: "weerapong.n@cmu.ac.th" },
+      { dept: "รังสีวิทยา", name: "คุณแพร", phone: "053935466", email: "parepilan307@gmail.com" },
+      { dept: "พยาธิวิทยา", name: "", phone: "053935442", email: "" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "น.ส.สุจิตรา หุ่นดี", phone: "053936322", email: "suhundee@gmail.com" },
+      { dept: "เวชศาสตร์ชุมชน", name: "อมรรัตน์ แต้มดื่ม", phone: "053935472-4 ต่อ 117", email: "amornrat.t56@gmail.com" }
+    ]
+  },
+  {
+    code: "103",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยธรรมศาสตร์",
+    type: "university",
+    housing: "paid",
+    housingNote: "ค่าที่พัก 1,000 บ./2 สัปดาห์, ค่าน้ำ 75 บ./ครึ่งเดือน, ค่าไฟ 5 บ./ยูนิต — ติดต่อคุณยุ้ย 0982505350",
+    contacts: [
+      { dept: "งานบริการการศึกษา", name: "น.ส.ดวงเดือน จรัสจินดา", phone: "029269678-9, 090-5620912", email: "nv_snow@hotmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "น.ส.กาญจนา จำแนกทาน", phone: "029269678", email: "Pedialric_bk@hotmail.com" },
+      { dept: "ศัลยศาสตร์", name: "คุณบูม", phone: "029269523, 029269698", email: "Auw_11@yahoo.com" },
+      { dept: "อายุรศาสตร์", name: "อ.พญ.บุบผา พรธิสาร", phone: "029269793", email: "pbubpha@hotmail.com" },
+      { dept: "สูติศาสตร์-นรีเวชวิทยา", name: "", phone: "029269678", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "", phone: "029269775", email: "inoonune.kp@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณบุษรัตน์ วงษ์จุ้ย / คุณดรีม", phone: "029269678", email: "bsaaruut@hotmail.com" },
+      { dept: "จักษุวิทยา", name: "คุณดวงเดือน จรัสจินดา", phone: "029269678", email: "kikunonea@hotmail.com" },
+      { dept: "รังสีวิทยา", name: "น.ส.นธิญา เพชรณรงค์", phone: "029269678", email: "Wrnpt02@gmail.com" }
+    ]
+  },
+  {
+    code: "104",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยนเรศวร",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "หน่วยบริหารการศึกษา", name: "", phone: "055967957", email: "" },
+      { dept: "กุมารเวชศาสตร์", name: "นายธเนศ ขำคล้าย", phone: "055967959", email: "" },
+      { dept: "จักษุวิทยา", name: "ว่าที่ร้อยตรีมาโนชญ์ สอดแกะ", phone: "055967951", email: "manods@nu.ac.th" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "055965018", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "", phone: "055965560", email: "" }
+    ]
+  },
+  {
+    code: "105",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยสงขลานครินทร์",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณลัดดาวัลย์ (พี่แอ๊ด)", phone: "074451540", email: "laddawan.c@psu.ac.th" },
+      { dept: "กิจการนักศึกษา", name: "คุณปาจรีย์", phone: "074451545", email: "" },
+      { dept: "อายุรศาสตร์", name: "คุณเจริญพร แก้วละอียด", phone: "074451451", email: "kjarernp@medicine.psu.ac.th", note: "ให้โทรติดต่อเจ้าหน้าที่โดยตรง" },
+      { dept: "ศัลยศาสตร์", name: "คุณปิยะพร คงนวล", phone: "074451405", email: "kpiyapor@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณจงดี บวรภัทรนานนท์", phone: "074451603, 0810983155", email: "sjongdee@medicine.psu.ac.th", note: "ให้โทรติดต่อเจ้าหน้าที่โดยตรง" },
+      { dept: "จักษุวิทยา", name: "คุณพนิดา เพชรปาน", phone: "074-451380-1", email: "ppanida@medicine.psu.ac.th", note: "เรียนได้ไม่เกิน 2 สัปดาห์" },
+      { dept: "รังสีวิทยา", name: "คุณธนพร พรหมจรรย์", phone: "074-451508", email: "ptanapor@medicine.psu.ac.th" },
+      { dept: "วิสัญญีวิทยา", name: "", phone: "074451655", email: "" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "", phone: "074451601, 0815982676", email: "pattawadee.d@email.psu.ac.th" },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "คุณสาวิกา วรรณพงศ์", phone: "074-451393", email: "savika.v@psu.ac.th" },
+      { dept: "จิตเวชศาสตร์", name: "คุณศุภวรรณ คณะภิกขุ", phone: "074-451351", email: "jeebpy@hotmail.com" }
+    ]
+  },
+  {
+    code: "106",
+    name: "คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณติ๊ก", phone: "022012268", email: "natthaya.tha@mahidol.ac.th" },
+      { dept: "อายุรศาสตร์", name: "คุณมินต์", phone: "022011391", email: "sp.sirinit@gmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "คุณศิริราช", phone: "022011815", email: "" },
+      { dept: "ศัลยศาสตร์", name: "คุณติ๋ว", phone: "022011315", email: "sopana.nook@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณพิณนภา", phone: "022012632", email: "pentitle28@gmail.com", note: "ต้องเลือกสาย: hand, sport, spine, trauma, pediatrics" },
+      { dept: "จักษุวิทยา", name: "", phone: "022011533", email: "" },
+      { dept: "วิสัญญี", name: "คุณแป๋ม", phone: "022011513", email: "", note: "เลือกสาย ICU หรือ ระบบหายใจ" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "คุณแจง", phone: "022011154", email: "" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "", phone: "02-201-1484", email: "" },
+      { dept: "จิตเวชศาสตร์", name: "", phone: "02-201-1478 ต่อ 221/230", email: "" },
+      { dept: "รังสีวิทยา", name: "", phone: "022011259 ต่อ 107", email: "" },
+      { dept: "สูติศาสตร์-นรีเวชวิทยา", name: "", phone: "022010793", email: "" }
+    ]
+  },
+  {
+    code: "107",
+    name: "คณะแพทยศาสตร์วชิรพยาบาล มหาวิทยาลัยนวมินทราธิราช",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "งานการศึกษาระดับคลินิก", name: "", phone: "02-2443151-2", email: "arada@nmu.ac.th" },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "น.ส.วรรัตน์ อ่อนสิงห์", phone: "022443397", email: "oto@nmu.ac.th" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "น.ส.รัตนวดี เกษรา", phone: "022443189", email: "emm@nmu.ac.th" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "02-2443282", email: "saraban-vajira-sur@nmu.ac.th" },
+      { dept: "จิตเวชศาสตร์", name: "น.ส.ณัฎธิณี พร้าเพรียง", phone: "02-244-3667", email: "saraban-vajira-psy@nmu.ac.th" }
+    ]
+  },
+  {
+    code: "108",
+    name: "คณะแพทยศาสตร์ศิริราชพยาบาล มหาวิทยาลัยมหิดล",
+    type: "university",
+    housing: "paid",
+    housingNote: "หอเจ้าพระยา — ค่ามัดจำกุญแจ 100 บ., ค่าทำความสะอาด 100 บ. ชำระเงินสดเท่านั้น | จักษุวิทยา: ต้องอยู่เวร มีที่พัก 14 วัน/750 บ.",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณเกด / น.ส.ณัฏฐ์ภัทร์ ศรสงวน", phone: "024196500, 02-419-9500, 085-2221600", email: "elective.si.mahidol@gmail.com" },
+      { dept: "สูติศาสตร์", name: "เมธยา", phone: "024194636", email: "maytaya9730@gmail.com" },
+      { dept: "ตจวิทยา", name: "คุณรุ่งนภา", phone: "024194337", email: "rungnapa.edu@gmail.com" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "024196450", email: "" },
+      { dept: "อายุรศาสตร์ ประสาทวิทยา", name: "", phone: "024197101", email: "" },
+      { dept: "อายุรศาสตร์ หทัยวิทยา", name: "", phone: "024196102", email: "" },
+      { dept: "อายุรศาสตร์ Hematology", name: "", phone: "024194448", email: "" },
+      { dept: "จักษุวิทยา", name: "คุณอนันต์", phone: "024196449", email: "" },
+      { dept: "วิสัญญีวิทยา", name: "", phone: "024197990", email: "" },
+      { dept: "อายุรกรรมปัจฉิมวัย", name: "", phone: "024197196", email: "" },
+      { dept: "จิตเวชศาสตร์", name: "คุณประภาพรรณ พุ่มโพธิ์ทอง", phone: "0860059264", email: "prapapan.pum@mahidol.ac.th" },
+      { dept: "แพทย์แผนไทยประยุกต์", name: "", phone: "024198826-7", email: "laddawan.sum@mahidol.edu" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "", phone: "02-419-7508 ต่อ 103", email: "undergraduate.pmr@gmail.com" }
+    ]
+  },
+  {
+    code: "109",
+    name: "โรงพยาบาลราชวิถี",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "สนับสนุนวิชาการ", name: "", phone: "022062900 ต่อ 60118", email: "tdif_2011@hotmail.com" },
+      { dept: "อายุรศาสตร์ GI", name: "", phone: "022062900 ต่อ 31032", email: "natte-060@hotmail.com" },
+      { dept: "อายุรศาสตร์ nephro", name: "", phone: "022062900 ต่อ 10991", email: "nephro.rj@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณสุมิตรา เอี่ยมโสภา", phone: "026446818", email: "sumitraer@gmail.com" },
+      { dept: "จักษุวิทยา (SCORa)", name: "คุณประไพ / คุณนฤชา", phone: "022062900 ต่อ 11400", email: "eyeoffice2221@gmail.com", note: "เปลี่ยนเป็นโครงการอบรมระยะสั้น SCORa — ค่าบริจาค 3,000 บ./สัปดาห์ สูงสุด 2 สัปดาห์" },
+      { dept: "โสต ศอ นาสิกวิทยา", name: "คุณประณิตา บัวกลาง", phone: "022062900 ต่อ 21101", email: "entrj2@gmail.com" },
+      { dept: "ศัลยศาสตร์ทั่วไป", name: "", phone: "022062900 ต่อ 60902", email: "general.surgery.rajavithi@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "", phone: "022062900 ต่อ 11406-7", email: "orthorajavithi@gmail.com" }
+    ]
+  },
+  {
+    code: "110",
+    name: "วิทยาลัยแพทยศาสตร์พระมงกุฎเกล้า",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "กองการศึกษา", name: "คุณอำไพ ศรีประสงค์", phone: "023547757, 0875673637", email: "am_lek@windowslive.com" },
+      { dept: "อายุรศาสตร์", name: "คุณเก่ง", phone: "027633280", email: "auchaya1809@gmail.com" },
+      { dept: "Cardiology", name: "คุณปราณี", phone: "027633827", email: "cardiology.pmk@hotmail.com" },
+      { dept: "โรคติดเชื้อ", name: "คุณชุติรัตน์ ภมรานนท์", phone: "061-1629493", email: "chutirat2022@gmail.com" },
+      { dept: "ศัลยศาสตร์", name: "คุณกุ้ง", phone: "027633133", email: "c_hutamast@hotmail.com", note: "รายงานตัววันแรก ภาควิชาศัลยศาสตร์ ชั้น 7" },
+      { dept: "ออร์โธปิดิกส์", name: "กรรณิการ์ เยือกเย็น", phone: "087-074-3073", email: "got.pmk@gmail.com" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "", phone: "027633642", email: "oattay@gmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "", phone: "027634162-3", email: "" },
+      { dept: "จิตเวชและประสาทวิทยา", name: "", phone: "027633188", email: "rtanc_@hotmail.com" }
+    ]
+  },
+  {
+    code: "111",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยศรีนครินทรวิโรฒ",
+    type: "university",
+    housing: "paid",
+    housingNote: "ค่าที่พัก 3,000 บ./2 สัปดาห์, ค่าไฟ 6 บ./หน่วย",
+    contacts: [
+      { dept: "แพทยศาสตรศึกษา", name: "สุรีย์รัตน์ เรืองศรี", phone: "037395451 ต่อ 60435, 086-018-7344", email: "sureeratru@g.swu.ac.th" },
+      { dept: "จิตเวชศาสตร์", name: "น.ส.ทิภาพร รติธรรมานนท์", phone: "0896001646", email: "tipapornn2559@gmail.com" },
+      { dept: "วิสัญญีวิทยา", name: "คุณทองสุข ประมล", phone: "0924621999", email: "" }
+    ]
+  },
+  {
+    code: "112",
+    name: "ศูนย์การแพทย์ปัญญานันทภิกขุ ชลประทาน มศว",
+    type: "university",
+    housing: "paid",
+    housingNote: "ค่าหอพัก 3,000 บ./เดือน/ห้อง (ไม่ถึง 1 เดือน = 3,000 บ.), ค่าประกัน 3,000 บ./คน, คีย์การ์ด 150 บ., กุญแจ 50 บ., น้ำ 20 บ./ยูนิต, ไฟ 6 บ./ยูนิต",
+    contacts: [
+      { dept: "แพทยศาสตรศึกษา", name: "น.ส.พันธ์ธิดา จันทรรักษ์", phone: "025022322", email: "electivepcmc@gmail.com" },
+      { dept: "อายุรกรรม", name: "นางไพลิน หมู่หัวนา", phone: "025022345 ต่อ 3604", email: "phailin@g.swu.ac.th" },
+      { dept: "กุมารเวชกรรม", name: "น.ส.ฤทัย โพลงพลับ", phone: "025022345 ต่อ 3602", email: "ruethai@g.swu.ac.th" },
+      { dept: "ศัลยกรรม", name: "นางธิดารัตน์ น้ำวน", phone: "025022345 ต่อ 3706", email: "tidaratk@g.swu.ac.th" },
+      { dept: "ออร์โธปิดิกส์", name: "นางนันทวัน แสนไทย", phone: "025022345 ต่อ 3708", email: "nuntawand@g.swu.ac.th" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "น.ส.ทัศนีย์ รัศมิทัต", phone: "025022345 ต่อ 3707", email: "tassaneer@g.swu.ac.th" }
+    ]
+  },
+  {
+    code: "113",
+    name: "โรงพยาบาลสมเด็จพระบรมราชเทวี ณ ศรีราชา",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "มีหอพัก — ติดต่อผ่าน Line Official",
+    contacts: [
+      { dept: "แพทยศาสตรศึกษา", name: "อรรัมภา กัลปากรณ์ชัย", phone: "038320200 ต่อ 66127", email: "onrumpa@somdej-mec.or.th" }
+    ]
+  },
+  {
+    code: "201",
+    name: "โรงพยาบาลเจริญกรุงประชารักษ์",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่าบริการฝึกงาน 200 บ./วัน, ค่าที่พัก 50 บ./วัน — ต้องเตรียมเอกสาร: สำเนาบัตรประชาชน, บัตรนักศึกษา, ทะเบียนบ้าน, รูปถ่าย",
+    contacts: [
+      { dept: "แพทยศาสตรศึกษา", name: "น.ส.พิณรัตน์ โพธะศรี", phone: "022892214, 0826691222", email: "phinnarat096@hotmail.com" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "022897499", email: "jogalaxy99@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "น.ส.วาสนา ครองสุขเลิศ", phone: "022897496", email: "vasanajim2518@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน/นิติเวช", name: "น.ส.วันวิสาข์ ท้ายเมือง", phone: "022897494", email: "modjunk2525@gmail.com" },
+      { dept: "ประสานงานที่พัก", name: "นางชญาดา ศิริจารุพฤกษ์", phone: "022892214, 0809214072", email: "j.chayada27@gmail.com" }
+    ]
+  },
+  {
+    code: "202",
+    name: "โรงพยาบาลตากสิน",
+    type: "hospital",
+    housing: "no",
+    housingNote: "ค่าบริการทางวิชาการ 400 บ./คน/วัน",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณอัตพล อุบลบาน", phone: "0868147808", email: "attaponau1100@gmail.com" }
+    ]
+  },
+  {
+    code: "203",
+    name: "โรงพยาบาลตำรวจ",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "จัดห้องพักจำนวน 2 ห้อง (ชาย 1, หญิง 1)",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณมะปราง", phone: "022076000 กด 6767", email: "education.pghdoctor@gmail.com" },
+      { dept: "นิติเวชศาสตร์", name: "", phone: "022076108 ต่อ 4301", email: "ifm.police@gmail.com" },
+      { dept: "หู คอ จมูก", name: "น.ส.พิมพ์วิไล พรมเลิศ", phone: "022076000 ต่อ 10761", email: "chanikarn.ns@gmail.com" },
+      { dept: "กุมารเวชกรรม", name: "", phone: "022076000 ต่อ 6404", email: "" },
+      { dept: "อายุรกรรม", name: "", phone: "022076327", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "ดต.สุนทร กล้าหาญ", phone: "0949365495", email: "officeopdmk6@gmail.com" },
+      { dept: "วิสัญญีวิทยา", name: "ว่าที่ร.ต.ท.ปวริศ / ว่าที่ร.ต.ต.หญิงเบญจลักษณ์", phone: "0991561915, 0807091155", email: "nongpcm35@hotmail.com" }
+    ]
+  },
+  {
+    code: "204",
+    name: "โรงพยาบาลนพรัตนราชธานี",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "งานศึกษาอบรม", name: "", phone: "025481000 ต่อ 2660", email: "" },
+      { dept: "อาชีวเวชศาสตร์", name: "", phone: "025174333", email: "occenvtraining@gmail.com" }
+    ]
+  },
+  {
+    code: "205",
+    name: "โรงพยาบาลเลิดสิน",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "สนับสนุนวิชาการ", name: "", phone: "023539734", email: "training.lerdsin2015@gmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณธารทิพย์ ดาวสุข", phone: "023539844, 087-808-0828", email: "ying_barbe@hotmail.com" }
+    ]
+  },
+  {
+    code: "404",
+    name: "ศูนย์แพทย์ รพ.เชียงรายประชานุเคราะห์",
+    type: "hospital",
+    housing: "no",
+    housingNote: "ไม่มีที่พัก — แนะนำ: พลับทอง 0918546464, หอพักประสิทธิ์นรกาญจน์ 0896323883, ลาลีต์ 053756525, โรงแรมอยู่สุข 053711913, โรงแรมบ้านศิลป์ 053756335-7, The Unique 0882532964",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณโต", phone: "0819894079", email: "to_t148@hotmail.com" },
+      { dept: "ที่พัก", name: "คุณน้อยหน่า", phone: "053756765", email: "" },
+      { dept: "อายุรกรรม", name: "คุณมัณฑิตา แสงสุวรรณ", phone: "0869201590", email: "" },
+      { dept: "กุมารเวชกรรม", name: "คุณอัจฉรี ขันแก้ว", phone: "0896969750", email: "ausharee.nes@gmail.com" },
+      { dept: "ศัลยกรรม", name: "คุณกัลยาณี ไชยนอก", phone: "0871741160, 0918591040", email: "kampa.k@hotmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณมณีรัตน์ แหลมคม", phone: "0844866465", email: "sanooker_15@hotmail.com" }
+    ]
+  },
+  {
+    code: "405",
+    name: "ศูนย์แพทย์ รพ.ตรัง",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณจารุวรรณ", phone: "075201500, 0887653775 (ส่วนตัว 0887901082)", email: "cpird.trang@gmail.com" }
+    ]
+  },
+  {
+    code: "406",
+    name: "โรงพยาบาลบุรีรัมย์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "", email: "tud_nach2554@hotmail.com" },
+      { dept: "อายุรกรรม", name: "คุณวารินธร สดสวัสดิ์", phone: "0883376423", email: "tonfern898@hotmail.com" },
+      { dept: "กุมารเวชกรรม", name: "คุณชลลดา พุ่มพวง / คุณจุฑารัตน์", phone: "0848337585, 0872461309", email: "" },
+      { dept: "ศัลยกรรม", name: "คุณชมทิมา ลุนพงษ์", phone: "0846059064", email: "chomtima_2524@hotmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณบัณฑิตา หนูหาร", phone: "0846070007", email: "banthita_pra@hotmail.com" }
+    ]
+  },
+  {
+    code: "407",
+    name: "ศูนย์แพทย์ รพ.พิจิตร",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.คคนัมพร ธรสุทธิสกุล", phone: "056613526 ต่อ 6321-6322, 082-771-5116", email: "kakanamporn.thorn@gmail.com" },
+      { dept: "อายุรศาสตร์", name: "น.ส.ชุติภรณ์ เกิดโปร่ง", phone: "056611355 ต่อ 6321-6322", email: "bube_bebe@hotmail.com" },
+      { dept: "กุมารเวชศาสตร์", name: "น.ส.ปารมี ซิ้มอิ่ม", phone: "056611355 ต่อ 6321-6322", email: "parameez@nu.ac.th" },
+      { dept: "ศัลยกรรม", name: "น.ส.เบญจมาศ ศิริเกตุ", phone: "056611355 ต่อ 6321-6322", email: "benjamas.siri06@gmail.com" },
+      { dept: "Elective", name: "น.ส.คคนัมพร ธรสุทธิสกุล", phone: "056611355 ต่อ 6321-6322", email: "kakanampornt59@nu.ac.th" }
+    ]
+  },
+  {
+    code: "408",
+    name: "โรงพยาบาลพุทธชินราช",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "ที่พักฟรี — ชาย 4 คน/ห้อง, หญิง 4 คน/ห้อง (เพศเดียวกัน 2 ห้อง รวม 8 คน) เกินจำนวนนี้ไม่สามารถจัดได้ — ติดต่อ นางเปมิกา ทองดอนคำ 055270300 ต่อ 21602",
+    contacts: [
+      { dept: "ผู้ประสานงาน", name: "น.ส.น้ำผึ้ง ดี", phone: "055270300 ต่อ 21609", email: "saraban@budhosp.go.th" },
+      { dept: "Elective", name: "น.ส.กาญจ์สุดา มิตรเอม", phone: "055-270300 ต่อ 21605", email: "elective.budc@cpird.in.th" },
+      { dept: "อายุรกรรม", name: "น.ส.ดรุณี นาคปาน", phone: "ต่อ 17901", email: "" },
+      { dept: "ศัลยกรรม", name: "น.ส.ทิพยวรรณ กลมเวช", phone: "ต่อ 19501", email: "" },
+      { dept: "กุมารเวชกรรม", name: "น.ส.ปนัดดา หมอนทอง", phone: "ต่อ 16202", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "น.ส.พจนา จิตรกำเหนิด", phone: "ต่อ 21611", email: "" },
+      { dept: "เวชกรรมสังคม", name: "นายวัชระ คงรอด", phone: "ต่อ 21609", email: "" }
+    ]
+  },
+  {
+    code: "409",
+    name: "โรงพยาบาลแพร่",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "กุมารเวชศาสตร์", name: "นายจรัญชัย สีสด", phone: "0882280028", email: "mecphrae@gmail.com" },
+      { dept: "อุบัติเหตุฉุกเฉิน", name: "นายจาตุรงค์ แสงสร้อย", phone: "0875435341", email: "mecphrae@gmail.com" }
+    ],
+    note: "รายงานตัววันแรก 8.30 น. อาคารวิทยบริการ ชั้น 2"
+  },
+  {
+    code: "410",
+    name: "ศูนย์แพทย์ รพ.มหาราชนครราชสีมา",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่ามัดจำกุญแจ 200 บ./คน, ค่ามัดจำคีย์การ์ด 100 บ./คน — ต้อง check in ก่อน 16.00 น.",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.พัลลภัทธ์ คชรัตน์ / คุณตุ๊ก", phone: "044295614, 044235223, 0644636325", email: "mec.korat@cpird.in.th" },
+      { dept: "อายุรศาสตร์", name: "", phone: "044235870", email: "" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "044235565", email: "sasikarn.korat@cpird.in.th" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณวันวิสา สาริบุตร", phone: "044235529, 0623423549", email: "wanvisa.korat@cpird.in.th" },
+      { dept: "เวชศาสตร์ฟื้นฟู", name: "คุณก้อย", phone: "044235136", email: "" },
+      { dept: "วิสัญญีวิทยา", name: "", phone: "044235040", email: "namol.khoo@gmail.com" }
+    ],
+    note: "รายงานตัววันแรก 8.00 น. อาคารศูนย์แพทยศาสตรศึกษาชั้นคลินิก ชั้น 2"
+  },
+  {
+    code: "411",
+    name: "รพ.มหาราชนครศรีธรรมราช",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.กุสุมา มาลาเวช (สุ)", phone: "094-5934750", email: "malawet.k@hotmail.com" },
+      { dept: "ศัลยกรรม", name: "คุณหนึ่ง", phone: "0817296644, 075340250 ต่อ 7641", email: "" }
+    ]
+  },
+  {
+    code: "412",
+    name: "ศูนย์แพทย์ รพ.พุทธโสธร",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่าหอพัก 800 บ./คน, ค่าน้ำ 100 บ., ค่าไฟตามจริง, ค่าทำความสะอาด 300 บ., ค่ามัดจำกุญแจ 200 บ., ค่ามัดจำคีย์การ์ด 1,000 บ. — นำผ้าปูที่นอน หมอน ผ้าห่มมาเอง",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "038514488", email: "" },
+      { dept: "ศัลยศาสตร์", name: "", phone: "", email: "wirawan_sk@cpird.in.th" }
+    ]
+  },
+  {
+    code: "415",
+    name: "ศูนย์แพทย์ รพ.ราชบุรี",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณมด / น.ส.มัทนา อนันตศิริ", phone: "032338678", email: "kajoice12@gmail.com" }
+    ]
+  },
+  {
+    code: "416",
+    name: "ศูนย์แพทย์ รพ.ลำปาง",
+    type: "hospital",
+    housing: "no",
+    housingNote: "ไม่มีที่พัก — แนะนำ: ข้าวหอมเรสซิเดนซ์ 054221988 / หอพักบนห้างเสรี 054221808",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.สุนันทา อาวรณ์ / คุณก้อย", phone: "054237400 ต่อ 4312", email: "sunanta_ying@cpird.in.th" },
+      { dept: "หลักสูตร ทะเบียน ประเมินผล", name: "", phone: "054237400 ต่อ 4306", email: "SUPALAK.CH@cpird.in.th" },
+      { dept: "กุมารเวชกรรม", name: "คุณภัทรภรณ์ มุ่งมูล", phone: "054237400 ต่อ 4306, 8657", email: "supalak.ch@cpird.in.th" },
+      { dept: "สูติ-นรีเวชกรรม", name: "คุณสุนันทา อาวรณ์", phone: "054237400 ต่อ 4312", email: "" },
+      { dept: "ออร์โทปิดิกส์", name: "คุณจินตนา บุญมา", phone: "054237400 ต่อ 8264", email: "" },
+      { dept: "อายุรกรรม", name: "คุณสุมิตรา ศิริชัย", phone: "054237400 ต่อ 8754, 8757", email: "" },
+      { dept: "ศัลยกรรม", name: "คุณเบญจมาศ ฝั้นจักสาย", phone: "054237400 ต่อ 8755, 8756", email: "surgerylampang@gmail.com" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณรัชนี ทำว่อง", phone: "054237400 ต่อ 4312, 092-7457299", email: "ratchanee.lp@cpird.in.th" },
+      { dept: "เวชกรรมสังคม", name: "คุณศิรินุช ไชยวรรณ", phone: "054237400 ต่อ 4312", email: "" }
+    ]
+  },
+  {
+    code: "417",
+    name: "โรงพยาบาลวชิระภูเก็ต",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "076361234 ต่อ 6801", email: "cpird-phuket@hotmail.com" },
+      { dept: "อายุรกรรม", name: "คุณอารีรัตน์ โกลาซ", phone: "076361234 ต่อ 6801", email: "" },
+      { dept: "ศัลยกรรม", name: "คุณสุนิษา เจ๊ะสม้อ", phone: "076361234 ต่อ 6801", email: "" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณวีรภัทรา วิทยา", phone: "076361234 ต่อ 6801", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณอุทุมพร พฤกษ์อุดม", phone: "076361234 ต่อ 6801", email: "" },
+      { dept: "จักษุวิทยา", name: "คุณสุนิษา หมื่นละม้าย", phone: "076361234 ต่อ 6801", email: "" },
+      { dept: "วิสัญญีวิทยา", name: "คุณประภาภรณ์ จิตรหลัง", phone: "076361234 ต่อ 6801", email: "" }
+    ],
+    note: "ดาวน์โหลดใบสมัครที่เว็บไซต์ศูนย์แพทย์ฯ แล้วส่งไป cpird-phuket@hotmail.com"
+  },
+  {
+    code: "419",
+    name: "โรงพยาบาลสงขลา",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณรัชฎาภรณ์ (เอฟ)", phone: "074338100 ต่อ 5000, 0819638861", email: "meded.sk@gmail.com" }
+    ]
+  },
+  {
+    code: "421",
+    name: "โรงพยาบาลสรรพสิทธิประสงค์",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "สามารถจัดที่พักให้ได้",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "045319200 ต่อ 2035", email: "kanyaphatpizza28@gmail.com" },
+      { dept: "วิสัญญี", name: "", phone: "045319200 ต่อ 1396", email: "" },
+      { dept: "ศัลยกรรม", name: "", phone: "045319200 ต่อ 1604", email: "" },
+      { dept: "อายุรกรรม", name: "", phone: "045319200 ต่อ 1450", email: "" }
+    ]
+  },
+  {
+    code: "422",
+    name: "ศูนย์แพทย์ รพ.สระบุรี",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่าที่พัก 500 บ./2 สัปดาห์ — ติดต่อ คุณศิริพร ฟูนอ 0817807902",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณอารีย์", phone: "036343586, 0817807902", email: "" },
+      { dept: "ศัลยศาสตร์ทั่วไป", name: "", phone: "036343500 ต่อ 2300", email: "" }
+    ],
+    note: "ต้องมีวัคซีน COVID ครบ 2 เข็ม และ ATK ภายใน 72 ชม.ก่อนมา"
+  },
+  {
+    code: "423",
+    name: "โรงพยาบาลสวรรค์ประชารักษ์",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "งานการศึกษา", name: "คุณเกวลิน วรุณโสภณ (ดาว)", phone: "056219870 ต่อ 204", email: "kuestrella1978@gmail.com" },
+      { dept: "กุมารเวชกรรม", name: "คุณรัชนีกร ดีอ่ำ (บี)", phone: "0869302180, 056219888 ต่อ 11232", email: "" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "นางนิตยากร โพธิ์งาม", phone: "056219888 ต่อ 11111", email: "meimayjung@gmail.com" },
+      { dept: "ศัลยศาสตร์", name: "นางณัฐพัชร์ เทศนีย์", phone: "056219888 ต่อ 11405, 0864419155", email: "ma_pang_whan@hotmail.com" },
+      { dept: "สูติ-นรีเวช", name: "คุณไอลดา ฤทธิ์เรืองเดช (มิ้งค์)", phone: "0955588101, 056219888 ต่อ 113", email: "" },
+      { dept: "โสต ศอ นาสิก", name: "นางพยอม ภุมรินทร์", phone: "056219888 ต่อ 11634", email: "effudessang@yahoo.com" },
+      { dept: "อายุรกรรม", name: "คุณปวริศ ด้วงมา (ต้อม)", phone: "094-8428818, 056219888 ต่อ 11506/11517", email: "" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณณัฐพัชร เทศนีย์", phone: "056219870 ต่อ 1405", email: "ma_pang_whan@hotmail.com" }
+    ]
+  },
+  {
+    code: "424",
+    name: "โรงพยาบาลสุราษฎร์ธานี",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "จิรนันท์ ภูมิไชยา", phone: "0864793152", email: "jiranan-bee@hotmail.com" }
+    ]
+  },
+  {
+    code: "425",
+    name: "โรงพยาบาลสุรินทร์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "044518937", email: "med_edsurin@hotmail.com" }
+    ]
+  },
+  {
+    code: "426",
+    name: "ศูนย์แพทย์ รพ.หาดใหญ่",
+    type: "hospital",
+    housing: "paid",
+    housingNote: "ค่าที่พัก 400 บ./2 สัปดาห์, ค่าประกันหอพัก 1,000 บ., ค่าประกันกุญแจ 200 บ. — ติดต่อ คุณยงยุทธ 0818973878 / คุณอังคณา 0620606523",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.อรอนงค์ โสภี / น.ส.อังคณา ชูดำ (ปุ๊กกี้)", phone: "083-5191739, 074239380, 062-0606523", email: "on-anong.so@cpird.in.th" },
+      { dept: "ที่พัก", name: "นายพศวีร์ ประทุมพร", phone: "093-7946776", email: "pasavee.pra@cpird.in.th" },
+      { dept: "อายุรกรรม", name: "คุณระนอง ทองวงศ์", phone: "0948043783", email: "" },
+      { dept: "กุมารเวชกรรม", name: "คุณสุภา สาระวิโรจน์", phone: "0872920618", email: "" },
+      { dept: "ศัลยกรรม", name: "คุณภัสชา นิลสมปภากร", phone: "0954383895", email: "aungsumalin9999@hotmail.com" },
+      { dept: "ออร์โธปิดิกส์", name: "คุณเพลินพิศ คัณฑะโณ", phone: "0864886881", email: "" },
+      { dept: "เวชศาสตร์ฉุกเฉิน", name: "คุณณัฐกานต์ ฉายกะพันธ์", phone: "0887880039", email: "" },
+      { dept: "วิสัญญี", name: "น.ส.จุฑาทิพย์ จินนุกูล", phone: "0914615370", email: "ningtises24@gmail.com" }
+    ]
+  },
+  {
+    code: "427",
+    name: "โรงพยาบาลอุดรธานี",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "ที่พักฟรี รับได้ครั้งละ 2 คน เพศเดียวกัน — ติดต่อ น.ส.นฤมล อุตทะบุตร 042211880",
+    contacts: [
+      { dept: "ศูนย์แพทย์ (อายุรกรรม)", name: "น.ส.บัญชร ทาสีลา (พิม)", phone: "042211880, 0810484847", email: "banchorn4847@gmail.com" },
+      { dept: "ศัลยกรรม", name: "จิรดา (พี่หนึ่ง)", phone: "0805524921", email: "" },
+      { dept: "อายุรศาสตร์", name: "พญ.อิญชญา แสนศักดิ์", phone: "0815442252", email: "isansak@gmail.com" }
+    ]
+  },
+  {
+    code: "428",
+    name: "โรงพยาบาลอุตรดิตถ์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "อายุรกรรม", name: "คุณจิราภรณ์ เรือนมณี", phone: "055832601 ต่อ 2149", email: "bananaple@hotmail.com" },
+      { dept: "กุมารเวชกรรม", name: "คุณกานดา เทียนนาค", phone: "055832601 ต่อ 2149", email: "kndthiennak@hotmail.com" },
+      { dept: "ศัลยกรรม", name: "คุณปัญจรัศม์ แสงรอด", phone: "055832601 ต่อ 2149", email: "p2up2unaja@gmail.com" }
+    ]
+  },
+  {
+    code: "501",
+    name: "รพ.สมเด็จเจ้าพระยายมราช",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ออร์โธปิดิกส์", name: "", phone: "035514999 ต่อ 1924", email: "" }
+    ]
+  },
+  {
+    code: "502",
+    name: "รพ.เจ้าพระยาอภัยภูเบศร",
+    type: "hospital",
+    housing: "no",
+    housingNote: "ไม่มีที่พัก — แนะนำ: หอพักเพชรพลอย 0972688686, 0917415142",
+    contacts: [
+      { dept: "อายุรกรรม/ออร์โธปิดิกส์", name: "คุณฑิฆัมพร จันทร์แดง", phone: "037211088 ต่อ 7002", email: "ticumporn.cha@cpird.in.th" },
+      { dept: "ศูนย์แพทย์", name: "น.ส.สุดารัตน์ ผิวอ่อน", phone: "037211088 ต่อ 7002", email: "sudarat.pue@cpird.in.th" }
+    ]
+  },
+  {
+    code: "505",
+    name: "โรงพยาบาลนครปฐม",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "พัฒนาทรัพยากรบุคคล", name: "นางฉันทนา บุญชู", phone: "034240053", email: "hrdnkpt@hotmail.com" },
+      { dept: "ศัลยกรรม", name: "", phone: "", email: "ratsamee.rr@gmail.com" }
+    ]
+  },
+  {
+    code: "506",
+    name: "โรงพยาบาลนครพิงค์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณชลธิดา ปินตา", phone: "053999200 ต่อ 2811", email: "chontidanoonam@gmail.com" }
+    ]
+  },
+  {
+    code: "507",
+    name: "โรงพยาบาลน่าน",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "องค์กรแพทย์", name: "คุณมยุรี / คุณสุทธินี / คุณหทัยรัตน์", phone: "054719023-4, 054719000 ต่อ 58403", email: "medicalsecretarynanhos@gmail.com" }
+    ]
+  },
+  {
+    code: "509",
+    name: "รพ.พระนครศรีอยุธยา",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "งานแพทยศาสตรศึกษา", name: "", phone: "035211888 ต่อ 2320", email: "" }
+    ]
+  },
+  {
+    code: "510",
+    name: "โรงพยาบาลพระนั่งเกล้า",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "องค์กรแพทย์", name: "คุณพรจิตร กุลวงศ์", phone: "025284567 ต่อ 1710", email: "mso.pnk@gmail.com" }
+    ]
+  },
+  {
+    code: "512",
+    name: "โรงพยาบาลแม่สอด",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "พัฒนาทรัพยากรบุคคล", name: "", phone: "055531229 ต่อ 1588, 1587, 1388", email: "pattana2016@outlook.com" }
+    ],
+    note: "ต้องมีผล CPR ก่อนวันเดินทางอย่างน้อย 3 วัน และ swab Day 0 ที่คลินิก ARI"
+  },
+  {
+    code: "513",
+    name: "โรงพยาบาลระยอง",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณเจี๊ยบ", phone: "", email: "jeab_pkk@yahoo.com" }
+    ]
+  },
+  {
+    code: "514",
+    name: "โรงพยาบาลลำพูน",
+    type: "hospital",
+    housing: "no",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณธิดารัตนภรณ์", phone: "053569100 ต่อ 76155", email: "lamphunmso@gmail.com" },
+      { dept: "ศัลยกรรม", name: "น.ส.ประภาพร วงษ์แก้ว", phone: "0612697970, 053569100 ต่อ 76155", email: "" }
+    ]
+  },
+  {
+    code: "516",
+    name: "รพ.สมเด็จพระยุพราชสระแก้ว",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "คุณสุพัตรา", phone: "037421437", email: "somkatoon@hotmail.com" }
+    ]
+  },
+  {
+    code: "521",
+    name: "โรงพยาบาลอุ้มผาง",
+    type: "hospital",
+    housing: "yes",
+    housingNote: "ที่พักฟรี ห้องพักรวม เตียง 2 ชั้น อาจมีนักศึกษาต่างสถาบันพักด้วย — ติดต่อ คุณพิรดา มนตรา 0632506753",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "นางวัลลีย์ คุณยศยิ่ง / คุณณริดา พรหมรักษา", phone: "055561270 ต่อ 170, 0633616242, 0953399449", email: "nikan02@hotmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "รพ.สมเด็จพระยุพราชกุฉินารายณ์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.ปวีณา กางสุพรรณ์", phone: "0955374862", email: "nooyui.55@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลปราสาท",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "องค์กรแพทย์", name: "", phone: "044551295, 0910780735", email: "" }
+    ]
+  },
+  {
+    code: "",
+    name: "ศพศ.รพ.นราธิวาสราชนครินทร์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "073510613", email: "" }
+    ]
+  },
+  {
+    code: "",
+    name: "คณะแพทยศาสตร์ มหาวิทยาลัยบูรพา",
+    type: "university",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายวิชาการ", name: "คุณวิรยา", phone: "038103153 ต่อ 2315, 098-2677734", email: "" }
+    ]
+  },
+  {
+    code: "522",
+    name: "รพ.สมเด็จพระนางเจ้าสิริกิติ์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "แพทยศาสตรศึกษา", name: "คุณจิตรลดา / น.ส.กฤษลดา วงศ์มุกดาพร", phone: "038933900 ต่อ 60944, 69827", email: "meo.srk.2020@gmail.com" },
+      { dept: "หัวหน้าฝ่ายวิชาการ", name: "น.ต.หญิงนันท์พัสพร สุขสานต์", phone: "0655059145, 038245735 ต่อ 69827", email: "nanpassapornying@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "สถาบันมะเร็งแห่งชาติ",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "022026800 ต่อ 2237", email: "" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลบำรุงราษฎร์",
+    type: "hospital",
+    housing: "no",
+    housingNote: "ไม่สามารถจัดที่พักได้",
+    contacts: [
+      { dept: "Postgraduate Medical Education", name: "พี่แจ๊ค (Piyapat Manasatitpong)", phone: "020113137", email: "" }
+    ],
+    note: "โปรแกรม 2 สัปดาห์ (รังสี, มะเร็ง, กุมาร, ทารกแรกเกิด) — รับ 2 คน/เดือน (เดือนเว้นเดือน) 12 คน/ปี — ต้องเซ็นสัญญาไม่เปิดเผยข้อมูล ติดบัตรชั่วคราวตลอดเวลา"
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลกระบี่",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "075626700", email: "yoau_yoau@hotmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลสวนปรุง กรมสุขภาพจิต",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "กลุ่มงานการแพทย์", name: "", phone: "053908521", email: "saraban_sp@suanprung.go.th" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลเกาะสมุย",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "องค์กรแพทย์", name: "พี่นุ้ย", phone: "077913200 ต่อ 3012", email: "sofea_2694@hotmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลทุ่งสง",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "", phone: "", email: "sasiwimon3747@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลสมุทรปราการ",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "สำนักงานแพทย์", name: "คุณศุภกิจ", phone: "0953822381", email: "physiciansofficesmpkhos@gmail.com" }
+    ]
+  },
+  {
+    code: "",
+    name: "โรงพยาบาลจุฬาภรณ์",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ฝ่ายทรัพยากรบุคคล", name: "นายธนกร ถนอมสังข์", phone: "027655705", email: "tanakorn.tan@cra.ac.th" }
+    ]
+  },
+  {
+    code: "",
+    name: "ศูนย์แพทย์ รพ.ชัยภูมิ",
+    type: "hospital",
+    housing: "unknown",
+    housingNote: "",
+    contacts: [
+      { dept: "ศูนย์แพทย์", name: "น.ส.พาขวัญ พงษ์สวัสดิ์", phone: "044104610 ต่อ 88120", email: "pakwan.cpm@cpird.in.th" }
+    ]
+  }
+];
+
+let currentFilter = 'all';
+let searchTerm = '';
+
+function normalize(s) {
+  return (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function matchesSearch(inst, term) {
+  if (!term) return true;
+  const hay = normalize([
+    inst.code, inst.name, inst.housingNote,
+    inst.note || '',
+    ...inst.contacts.map(c => [c.dept, c.name, c.phone, c.email, c.note || ''].join(' '))
+  ].join(' '));
+  const terms = normalize(term).split(' ');
+  return terms.every(t => hay.includes(t));
+}
+
+function matchesFilter(inst, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'housing') return inst.housing === 'yes' || inst.housing === 'paid';
+  if (filter === 'no-housing') return inst.housing === 'no';
+  if (filter === 'university') return inst.type === 'university';
+  if (filter === 'hospital') return inst.type === 'hospital';
+  return true;
+}
+
+function housingBadge(h) {
+  if (h === 'yes') return '<span class="housing-tag housing-yes">มีที่พักฟรี</span>';
+  if (h === 'paid') return '<span class="housing-tag housing-paid">มีที่พัก (มีค่าใช้จ่าย)</span>';
+  if (h === 'no') return '<span class="housing-tag housing-no">ไม่มีที่พัก</span>';
+  return '';
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const filtered = DATA.filter(i => matchesSearch(i, searchTerm) && matchesFilter(i, currentFilter));
+
+  document.getElementById('stats').innerHTML =
+    `<span>แสดง <strong>${filtered.length}</strong> จาก <strong>${DATA.length}</strong> สถาบัน</span>
+     <button class="expand-all" onclick="toggleAll()">${document.querySelector('.institution.open') ? 'ยุบทั้งหมด' : 'ขยายทั้งหมด'}</button>`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="no-results">ไม่พบผลลัพธ์ — ลองค้นหาด้วยคำอื่น</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((inst, idx) => {
+    const contacts = inst.contacts.map(c => `
+      <div class="contact-row">
+        <span class="dept-tag">${esc(c.dept)}</span>
+        ${c.name ? `<span class="contact-name">${esc(c.name)}</span>` : ''}
+        ${c.phone ? `<span class="contact-phone">${esc(c.phone)}</span>` : ''}
+        ${c.email ? `<span class="contact-email">${esc(c.email)}</span>` : ''}
+        ${c.note ? `<div class="contact-note">${esc(c.note)}</div>` : ''}
+      </div>
+    `).join('');
+
+    return `
+      <div class="institution" data-idx="${idx}">
+        <div class="inst-header" onclick="toggle(this)">
+          ${inst.code ? `<span class="inst-code">${esc(inst.code)}</span>` : ''}
+          <div class="inst-info">
+            <div class="inst-name">${esc(inst.name)}</div>
+            <div class="inst-meta">
+              ${housingBadge(inst.housing)}
+              <span class="housing-tag" style="background:#f0ede6;color:#6B6760">${inst.contacts.length} ผู้ประสานงาน</span>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="inst-body">
+          <div class="contact-section">
+            <div class="section-label">ผู้ประสานงาน</div>
+            ${contacts}
+          </div>
+          ${inst.housingNote ? `<div class="housing-info"><strong>ที่พัก:</strong> ${esc(inst.housingNote)}</div>` : ''}
+          ${inst.note ? `<div class="housing-info"><strong>หมายเหตุ:</strong> ${esc(inst.note)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggle(el) {
+  el.closest('.institution').classList.toggle('open');
+}
+
+function toggleAll() {
+  const all = document.querySelectorAll('.institution');
+  const anyOpen = document.querySelector('.institution.open');
+  all.forEach(el => {
+    if (anyOpen) el.classList.remove('open');
+    else el.classList.add('open');
+  });
+  render();
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.querySelector('[data-filter="all"]').classList.add('active');
+render();
+</script>
+</body>
+</html>
